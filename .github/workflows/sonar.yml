@@ -1,21 +1,29 @@
-name: SonarCloud
+name: SonarCloud Scan
+
 on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ main ]
 
 jobs:
-  sonar:
+  sonarcloud-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '17'
+          fetch-depth: 0
+
+      # Priority 2 Mandate: Check for the required secret before running
+      - name: Check for SonarCloud Token Secret
+        if: ${{ secrets.SONAR_TOKEN == '' }}
+        run: |
+          echo "WARNING: SonarCloud scan skipped because SONAR_TOKEN secret is not set."
+          exit 0
+
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        if: ${{ secrets.SONAR_TOKEN != '' }}
+        uses: SonarSource/sonarcloud-github-action@v2.0.3
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Default GitHub token for PR decoration
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # New secret for SonarCloud authentication
