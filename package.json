@@ -1,0 +1,12 @@
+{
+  "name": "sonarcube-demo",
+  "version": "0.0.1",
+  "description": "Small demo project to test SonarCloud/SonarQube integration",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "kalvinparker",
+  "license": "MIT",
+  "devDependencies": {}
+}
