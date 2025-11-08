@@ -1,0 +1,23 @@
+name: Sonar Setup
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run create_quality_gate.sh
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          chmod +x ./scripts/create_quality_gate.sh
+          ./scripts/create_quality_gate.sh "kalvinparker_default_gate" "kalvinparker_Sonarcube"
