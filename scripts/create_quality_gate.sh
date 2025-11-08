@@ -17,8 +17,9 @@ fi
 echo "Creating quality gate: ${GATE_NAME}"
 
 # 1) Create the gate
-CREATED=$(curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/create?name=$(jq -nr --arg v "$GATE_NAME" '$v')")
-GATE_ID=$(echo "$CREATED" | jq -r '.id') 
+CREATED=$(curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/create?name=$(jq -nr --arg v \"$GATE_NAME\" '$v')&organization=$(jq -nr --arg v \"$SONAR_ORG\" '$v')")
+echo "Create response: $CREATED"
+GATE_ID=$(echo "$CREATED" | jq -r '.id')
 if [[ "$GATE_ID" == "null" || -z "$GATE_ID" ]]; then
   echo "Failed to create gate: $CREATED"
   exit 3
@@ -39,8 +40,9 @@ curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/create_condition?ga
 curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/create_condition?gateId=${GATE_ID}&metric=new_coverage&op=LT&error=80" | jq -r .
 
 # 3) Set gate for project
-curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/select?projectKey=${PROJECT_KEY}&gateId=${GATE_ID}" | jq -r .
-curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/select?projectKey=${PROJECT_KEY}&gateId=${GATE_ID}&organization=${SONAR_ORG}" | jq -r .
+echo "Attaching quality gate ${GATE_ID} to project ${PROJECT_KEY} (organization=${SONAR_ORG})"
+ATTACH=$(curl -s -u ${SONAR_TOKEN}: -X POST "${API_BASE}/qualitygates/select?projectKey=${PROJECT_KEY}&gateId=${GATE_ID}&organization=$(jq -nr --arg v \"$SONAR_ORG\" '$v')")
+echo "Attach response: $ATTACH"
 
 echo "Quality gate ${GATE_NAME} (${GATE_ID}) created and attached to ${PROJECT_KEY}."
 
