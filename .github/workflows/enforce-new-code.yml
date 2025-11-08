@@ -1,0 +1,42 @@
+name: Enforce Sonar New Code
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      project_key:
+        description: 'Sonar project key to check'
+        required: false
+        default: 'kalvinparker_Sonarcube'
+
+jobs:
+  enforce:
+    name: Enforce New Code Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure tools (jq, curl)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq curl
+
+      - name: Run Sonar new-code enforcement
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [[ -z "${SONAR_TOKEN:-}" ]]; then
+            echo "Error: SONAR_TOKEN secret is not set in repository."
+            exit 2
+          fi
+          # Pick project key: if running via workflow_dispatch with input, use it; otherwise default
+          if [[ -n "${{ github.event.inputs.project_key || '' }}" ]]; then
+            PROJECT_KEY="${{ github.event.inputs.project_key }}"
+          else
+            PROJECT_KEY='kalvinparker_Sonarcube'
+          fi
+          echo "Using project key: $PROJECT_KEY"
+          bash scripts/enforce_sonar_new_code.sh "$PROJECT_KEY"
