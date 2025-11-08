@@ -18,6 +18,7 @@ jobs:
       - name: Run create_quality_gate.sh
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORG: kalvinparker
         run: |
           chmod +x ./scripts/create_quality_gate.sh
           ./scripts/create_quality_gate.sh "kalvinparker_default_gate" "kalvinparker_Sonarcube"
