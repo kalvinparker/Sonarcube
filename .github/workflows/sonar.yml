@@ -16,13 +16,13 @@ jobs:
 
       # Priority 2 Mandate: Check for the required secret before running
       - name: Check for SonarCloud Token Secret
-        if: ${{ secrets.SONAR_TOKEN == '' }}
+        if: ${{ !secrets.SONAR_TOKEN }}
         run: |
           echo "WARNING: SonarCloud scan skipped because SONAR_TOKEN secret is not set."
           exit 0
 
       - name: SonarCloud Scan
-        if: ${{ secrets.SONAR_TOKEN != '' }}
+        if: ${{ secrets.SONAR_TOKEN }}
         uses: SonarSource/sonarcloud-github-action@v2.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Default GitHub token for PR decoration
